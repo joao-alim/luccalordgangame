@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="apple-touch-icon" sizes="57x57" href="/icon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/icon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/icon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/icon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/icon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon/favicon-16x16.png">
+    <link rel="manifest" href="/icon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/icon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lucca Lordgan Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --letter-box-size: min(12vw, 60px);
+            --key-height: min(10vw, 50px);
+            --key-font-size: clamp(12px, 3vw, 16px);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #89CFF0, #FFEE8C);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        .letter-box {
+            width: var(--letter-box-size);
+            height: var(--letter-box-size);
+            min-width: 30px;
+            min-height: 30px;
+            border: 2px solid #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--letter-box-size) * 0.5);
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .letter-box.correct {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .letter-box.present {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+            color: white;
+        }
+        
+        .letter-box.absent {
+            background-color: #6b7280;
+            border-color: #6b7280;
+            color: white;
+        }
+        
+        .letter-box.space {
+            background-color: #d1d5db;
+            border-color: #9ca3af;
+        }
+        
+        .game-row {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        #gameBoard {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .keyboard-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 5px;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+        
+        .keyboard-key {
+            flex: 1;
+            min-width: 0;
+            height: var(--key-height);
+            margin: 0 2px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: var(--key-font-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            user-select: none;
+        }
+        
+        .keyboard-key.special-key {
+            flex: 1.5;
+            font-size: calc(var(--key-font-size) * 0.9);
+        }
+        
+        .keyboard-key.space-key {
+            flex: 10;
+            max-width: 300px;
+        }
+        
+        .keyboard-key:hover {
+            opacity: 0.8;
+        }
+        
+        .keyboard-key:active {
+            transform: scale(0.95);
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .bounce {
+            animation: bounce 0.5s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .flip {
+            animation: flip 0.5s ease forwards;
+        }
+        
+        @keyframes flip {
+            0% { transform: rotateX(0); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0); }
+        }
+        
+        #message {
+            width: 90%;
+            max-width: 500px;
+            margin: 15px auto;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .message-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .message-success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        #resetGame {
+            background-color: #60a5fa;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #resetGame:hover {
+            background-color: #3b82f6;
+        }
+        
+        @media (max-width: 480px) {
+            :root {
+                --letter-box-size: min(14vw, 50px);
+                --key-height: min(12vw, 45px);
+            }
+            
+            .game-row {
+                gap: 3px;
+            }
+            
+            #gameBoard {
+                gap: 3px;
+            }
+            
+            .keyboard-key {
+                margin: 0 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6 text-center">Lucca Lordgan Game</h1>
+        
+        <div id="gameBoard"></div>
+        
+        <div class="keyboard-container">
+            <div class="keyboard-row">
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="q">Q</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="w">W</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="e">E</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="r">R</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="t">T</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="y">Y</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="u">U</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="i">I</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="o">O</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="p">P</button>
+            </div>
+            <div class="keyboard-row">
+                <div style="flex: 0.5;"></div>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="a">A</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="s">S</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="d">D</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="f">F</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="g">G</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="h">H</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="j">J</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="k">K</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="l">L</button>
+                <div style="flex: 0.5;"></div>
+            </div>
+            <div class="keyboard-row">
+                <button class="keyboard-key special-key bg-gray-300 text-gray-800" data-key="Enter">ENTER</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="z">Z</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="x">X</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="c">C</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="v">V</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="b">B</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="n">N</button>
+                <button class="keyboard-key bg-gray-200 text-gray-800" data-key="m">M</button>
+                <button class="keyboard-key special-key bg-gray-300 text-gray-800" data-key="Backspace">⌫</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="keyboard-key space-key bg-gray-300 text-gray-800" data-key=" ">SPACEBAR</button>
+            </div>
+        </div>
+        
+        <div id="message" class="hidden"></div>
+        
+        <button id="resetGame">Novo Jogo</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const SECRET_WORD = "romeo";
+            const MAX_ATTEMPTS = 6;
+            
+            let currentAttempt = 0;
+            let currentPosition = 0;
+            let gameOver = false;
+            let gameBoard = [];
+            
+            const gameBoardElement = document.getElementById('gameBoard');
+            const messageElement = document.getElementById('message');
+            const resetGameButton = document.getElementById('resetGame');
+            
+            function initializeGame() {
+                currentAttempt = 0;
+                currentPosition = 0;
+                gameOver = false;
+                gameBoard = [];
+                gameBoardElement.innerHTML = '';
+                messageElement.className = 'hidden';
+                resetKeyboard();
+                createGameBoard(SECRET_WORD.length);
+            }
+            
+            function createGameBoard(wordLength) {
+                for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'game-row';
+                    
+                    const rowLetters = [];
+                    
+                    for (let j = 0; j < wordLength; j++) {
+                        const letterBox = document.createElement('div');
+                        letterBox.className = 'letter-box bg-white';
+                        row.appendChild(letterBox);
+                        rowLetters.push({
+                            element: letterBox,
+                            letter: ''
+                        });
+                    }
+                    
+                    gameBoardElement.appendChild(row);
+                    gameBoard.push(rowLetters);
+                }
+            }
+            
+            document.addEventListener('keydown', handleKeyPress);
+            
+            document.querySelectorAll('.keyboard-key').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const key = this.getAttribute('data-key');
+                    handleKey(key);
+                    this.blur();
+                });
+                
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.classList.add('active');
+                    const key = this.getAttribute('data-key');
+                    handleKey(key);
+                });
+                
+                button.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('active');
+                });
+            });
+            
+            function handleKeyPress(e) {
+                if (gameOver) return;
+                
+                const key = e.key;
+                handleKey(key);
+            }
+            
+            function handleKey(key) {
+                if (gameOver) return;
+                
+                if ((/^[a-záàâãéèêíïóôõöúçñ]$/i.test(key) || key === ' ') && currentPosition < SECRET_WORD.length) {
+                    addLetter(key === ' ' ? ' ' : key.toLowerCase());
+                } else if (key === 'Backspace' || key === '⌫') {
+                    removeLetter();
+                } else if ((key === 'Enter' || key === 'ENTER') && currentPosition === SECRET_WORD.length) {
+                    submitGuess();
+                }
+            }
+            
+            function addLetter(letter) {
+                const currentRow = gameBoard[currentAttempt];
+                if (currentPosition < SECRET_WORD.length) {
+                    currentRow[currentPosition].letter = letter;
+                    currentRow[currentPosition].element.textContent = letter === ' ' ? '␣' : letter.toUpperCase();
+                    
+                    if (letter === ' ') {
+                        currentRow[currentPosition].element.classList.add('space');
+                    }
+                    
+                    currentRow[currentPosition].element.classList.add('bounce');
+                    setTimeout(() => {
+                        currentRow[currentPosition].element.classList.remove('bounce');
+                    }, 500);
+                    
+                    currentPosition++;
+                }
+            }
+            
+            function removeLetter() {
+                if (currentPosition > 0) {
+                    currentPosition--;
+                    const currentRow = gameBoard[currentAttempt];
+                    currentRow[currentPosition].letter = '';
+                    currentRow[currentPosition].element.textContent = '';
+                    currentRow[currentPosition].element.className = 'letter-box bg-white';
+                }
+            }
+            
+            function submitGuess() {
+                const currentRow = gameBoard[currentAttempt];
+                const guess = currentRow.map(item => item.letter).join('');
+                
+                if (guess.length !== SECRET_WORD.length) {
+                    shakeRow(currentRow);
+                    showMessage('Preencha todas as letras', 'error');
+                    return;
+                }
+                
+                const result = checkGuess(guess);
+                updateRowColors(currentRow, result);
+                updateKeyboard(guess, result);
+                
+                if (guess === SECRET_WORD.toLowerCase()) {
+                    gameOver = true;
+                    setTimeout(() => {
+                        showMessage('CONGRATULATIONS! You got it!', 'success');
+                    }, SECRET_WORD.length * 300);
+                    return;
+                }
+                
+                currentAttempt++;
+                if (currentAttempt >= MAX_ATTEMPTS) {
+                    gameOver = true;
+                    setTimeout(() => {
+                        showMessage(`SORRY... Wait for the reveal`, 'error');
+                    }, SECRET_WORD.length * 300);
+                    return;
+                }
+                
+                currentPosition = 0;
+            }
+
+            function checkGuess(guess) {
+                const result = Array(guess.length).fill('absent');
+                const secretLetterCount = {};
+                
+                for (const letter of SECRET_WORD.toLowerCase()) {
+                    secretLetterCount[letter] = (secretLetterCount[letter] || 0) + 1;
+                }
+                
+                for (let i = 0; i < guess.length; i++) {
+                    if (guess[i] === SECRET_WORD[i].toLowerCase()) {
+                        result[i] = 'correct';
+                        secretLetterCount[guess[i]]--;
+                    }
+                }
+                
+                for (let i = 0; i < guess.length; i++) {
+                    if (result[i] !== 'correct' && secretLetterCount[guess[i]] > 0) {
+                        result[i] = 'present';
+                        secretLetterCount[guess[i]]--;
+                    }
+                }
+                
+                return result;
+            }
+
+            function updateRowColors(row, result) {
+                for (let i = 0; i < row.length; i++) {
+                    setTimeout(() => {
+                        row[i].element.classList.add('flip');
+                        
+                        setTimeout(() => {
+                            row[i].element.classList.remove('bg-white', 'space');
+                            row[i].element.classList.add(result[i]);
+                            row[i].element.classList.remove('flip');
+                            
+                            if (row[i].letter === ' ') {
+                                row[i].element.classList.add('space');
+                            }
+                        }, 250);
+                    }, i * 300);
+                }
+            }
+            
+            function updateKeyboard(guess, result) {
+                for (let i = 0; i < guess.length; i++) {
+                    const letter = guess[i];
+                    const status = result[i];
+                    const keyButton = document.querySelector(`.keyboard-key[data-key="${letter}"]`);
+                    
+                    if (keyButton) {
+                        keyButton.className = keyButton.className
+                            .replace(/bg-gray-200|bg-gray-300|bg-green-500|bg-yellow-500|bg-gray-600/g, '')
+                            .replace(/text-gray-800|text-white/g, '');
+                        
+                        if (status === 'correct') {
+                            keyButton.classList.add('bg-green-500', 'text-white');
+                        } else if (status === 'present' && !keyButton.classList.contains('bg-green-500')) {
+                            keyButton.classList.add('bg-yellow-500', 'text-white');
+                        } else if (status === 'absent' && 
+                                  !keyButton.classList.contains('bg-green-500') && 
+                                  !keyButton.classList.contains('bg-yellow-500')) {
+                            keyButton.classList.add('bg-gray-600', 'text-white');
+                        }
+                        
+                        keyButton.classList.add('keyboard-key');
+                        if (keyButton.classList.contains('special-key') || keyButton.classList.contains('space-key')) {
+                            keyButton.classList.add(keyButton.getAttribute('data-key') === ' ' ? 'space-key' : 'special-key');
+                        }
+                    }
+                }
+            }
+            
+            function resetKeyboard() {
+                document.querySelectorAll('.keyboard-key').forEach(button => {
+                    const key = button.getAttribute('data-key');
+                    
+                    button.className = button.className
+                        .replace(/bg-gray-200|bg-gray-300|bg-green-500|bg-yellow-500|bg-gray-600/g, '')
+                        .replace(/text-gray-800|text-white/g, '');
+                    
+                    button.classList.add('keyboard-key');
+                    
+                    if (key.length === 1 && key !== ' ') {
+                        button.classList.add('bg-gray-200', 'text-gray-800');
+                    } else if (key === ' ') {
+                        button.classList.add('bg-gray-300', 'text-gray-800', 'space-key');
+                    } else {
+                        button.classList.add('bg-gray-300', 'text-gray-800');
+                        if (key === 'Enter' || key === 'Backspace') {
+                            button.classList.add('special-key');
+                        }
+                    }
+                });
+            }
+            
+            function shakeRow(row) {
+                row.forEach(item => {
+                    item.element.classList.add('shake');
+                    setTimeout(() => {
+                        item.element.classList.remove('shake');
+                    }, 500);
+                });
+            }
+            
+            function showMessage(text, type) {
+                messageElement.textContent = text;
+                messageElement.className = type === 'error' ? 'message-error' : 'message-success';
+                messageElement.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    messageElement.classList.add('hidden');
+                }, 3000);
+            }
+            
+            resetGameButton.addEventListener('click', initializeGame);
+            
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            initializeGame();
+        });
+    </script>
+</body>
+</html>
